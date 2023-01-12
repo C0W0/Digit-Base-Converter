@@ -52,7 +52,7 @@ def predict(image: cv2.Mat, numCount: int) -> list:
     
     clusteredData: list
     totalDistance = 0.0
-    for i in range(numCount*2):        
+    for i in range(max(10, numCount*2)):        
         (newData, newDistance) = k_means_cluster(numCount, nums)
         if(i == 0 or newDistance < totalDistance):
             clusteredData = newData
@@ -62,17 +62,12 @@ def predict(image: cv2.Mat, numCount: int) -> list:
     for i in range(numCount):
         clustered = clusteredData[i]
         image: np.ndarray
-        print('------------------')
         for image in clustered:
             imageResized = image.reshape((1, 28, 28, 1))
             
             result = getNum(model(imageResized)[0])
             detectionResult[i] *= 10
             detectionResult[i] += result
-            
-            print(result)
-            plt.imshow(image, cmap='gray')
-            plt.show()
     
     return detectionResult
     
@@ -117,9 +112,13 @@ def k_means_cluster(k: int, images: list[tuple[np.ndarray, list]]) -> tuple[np.n
         
     return (clusters, totalDistance)
 
+def init_model():
+    global model
+    model = load_model('LeNet_5_Model')
+    
 
 if(__name__ == '__main__'):
-    model = load_model('LeNet_5_Model')
+    init_model()
     numCount = 3
     image = cv2.imread('test_images/test_2.png')
     print(predict(image, numCount))
